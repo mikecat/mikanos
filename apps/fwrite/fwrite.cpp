@@ -21,14 +21,14 @@ extern "C" void main(int argc, char** argv) {
   std::vector<unsigned char> data(size, 'a');
   switch (type) {
     case 0:
-      puts("writing 1 object whose size is \"size\"");
+      printf("writing 1 object whose size is %ld\n", size);
       if (fwrite(data.data(), size, 1, fp) != 1) {
         printf("fwrite failed\n");
         isError = true;
       }
       break;
     case 1:
-      puts("writing \"size\" objects whose size is 1");
+      printf("writing %ld objects whose size is 1\n", size);
       if (fwrite(data.data(), 1, size, fp) != size) {
         printf("fwrite failed\n");
         isError = true;
@@ -38,7 +38,7 @@ extern "C" void main(int argc, char** argv) {
       printf("unknown type: %d\n", type);
       isError = true;
   }
-  if (!fclose(fp)) {
+  if (fclose(fp) == EOF) {
     printf("fclose failed: %s\n", strerror(errno));
     isError = true;
   }
