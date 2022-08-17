@@ -4,17 +4,17 @@
 #include <cstring>
 #include <vector>
 
-extern "C" void main(int argc, char** argv) {
+int main(int argc, char** argv) {
   if (argc != 3 && argc != 4) {
     printf("Usage: %s out_file write_size [type]\n",
       argc > 0 ? argv[0] : "fwrite");
-    exit(1);
+    return 1;
   }
   int type = argc == 3 ? 0 : atoi(argv[3]);
   FILE* fp = fopen(argv[1], "wb");
   if (fp == NULL) {
     printf("fopen failed: %s\n", strerror(errno));
-    exit(1);
+    return 1;
   }
   bool isError = false;
   long size = atol(argv[2]);
@@ -42,5 +42,5 @@ extern "C" void main(int argc, char** argv) {
     printf("fclose failed: %s\n", strerror(errno));
     isError = true;
   }
-  exit(isError ? 1 : 0);
+  return isError ? 1 : 0;
 }

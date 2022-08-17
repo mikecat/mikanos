@@ -1,5 +1,4 @@
 #include <cstdio>
-#include <cstdlib>
 #include <cstring>
 #include "../syscall.h"
 
@@ -7,12 +6,12 @@ constexpr int H_MARGIN = 28, W_MARGIN = 8;
 constexpr int WIDTH = 200, HEIGHT = 100;
 constexpr int WX = 10, WY = 10;
 
-extern "C" int main(int argc, char** argv) {
+int main(int argc, char** argv) {
   auto [hwnd, errOpen] = SyscallOpenWindow(
     WIDTH + W_MARGIN, HEIGHT + H_MARGIN, WX, WY, "events");
   if (errOpen) {
     printf("SyscallOpenWindow failed: %s\n", strerror(errOpen));
-    exit(errOpen);
+    return errOpen;
   }
   for (;;) {
     AppEvent event;
@@ -20,7 +19,7 @@ extern "C" int main(int argc, char** argv) {
     if (err) {
       printf("SysCallReadEvent failed: %s\n", strerror(err));
       SyscallCloseWindow(hwnd);
-      exit(err);
+      return err;
     }
     if (n == 0) continue;
     auto& arg = event.arg;
@@ -28,7 +27,7 @@ extern "C" int main(int argc, char** argv) {
       case AppEvent::kQuit:
         printf("kQuit\n");
         SyscallCloseWindow(hwnd);
-        exit(0);
+        return 0;
         break;
       case AppEvent::kMouseMove:
         printf("kMouseMove\n");

@@ -1,5 +1,4 @@
 #include <cstdio>
-#include <cstdlib>
 #include <cstring>
 #include "../syscall.h"
 
@@ -9,12 +8,12 @@ constexpr int WX = 10, WY = 10;
 
 constexpr int ZEROX = 10, ZEROY = 10, DX = 80, DY = 20;
 
-extern "C" int main(int argc, char** argv) {
+int main(int argc, char** argv) {
   auto [hwnd, errOpen] = SyscallOpenWindow(
     WIDTH + W_MARGIN, HEIGHT + H_MARGIN, WX, WY, "colors");
   if (errOpen) {
     printf("SyscallOpenWindow failed: %s\n", strerror(errOpen));
-    exit(errOpen);
+    return errOpen;
   }
   for (int i = 0; i < 8; i++) {
     int x = X_OFFSET + ZEROX + DX * (i % 4);
@@ -34,11 +33,11 @@ extern "C" int main(int argc, char** argv) {
     if (err) {
       printf("SysCallReadEvent failed: %s\n", strerror(err));
       SyscallCloseWindow(hwnd);
-      exit(err);
+      return err;
     }
     if (n > 0 && event.type == AppEvent::kQuit) {
       SyscallCloseWindow(hwnd);
-      exit(0);
+      return 0;
     }
   }
 }
