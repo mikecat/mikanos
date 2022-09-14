@@ -15,9 +15,16 @@ namespace {
       : desc_buf_{desc_buf},
         desc_buf_len_{len},
         p_{desc_buf} {
+      Log(kWarn, "CDR len=%d\n", len);
+      for (int i = 0; i < len; i++) {
+        Log(kWarn, "%02X ", (int)desc_buf[i]);
+        if((i+1) %16==0)Log(kWarn, "\n");
+      }
+      if(len%16!=0)Log(kWarn, "\n");
     }
 
     const uint8_t* Next() {
+      Log(kWarn, "CDR Next delta=%d\n", (int)p_[0]);
       p_ += p_[0];
       if (p_ < desc_buf_ + desc_buf_len_) {
         return p_;
@@ -82,6 +89,9 @@ namespace {
   }
 
   usb::ClassDriver* NewClassDriver(usb::Device* dev, const usb::InterfaceDescriptor& if_desc) {
+    Log(kWarn, "2-argument NCD class=%d sub_class=%d protocol=%d\n",
+        if_desc.interface_class, if_desc.interface_sub_class,
+        if_desc.interface_protocol);
     if (if_desc.interface_class == 3 &&
         if_desc.interface_sub_class == 1) {  // HID boot interface
       if (if_desc.interface_protocol == 1) {  // keyboard
@@ -259,6 +269,7 @@ namespace usb {
     }
     ConfigurationDescriptorReader config_reader{buf, len};
 
+    Log(kWarn, "class = %d\n", (int)device_desc_.device_class);
     if (device_desc_.device_class != 0) {
       auto [ class_driver, err ] =
         NewClassDriver(ep_configs_, this, config_reader);
@@ -269,11 +280,13 @@ namespace usb {
     } else {
       bool no_class_driver = true;
       while (auto if_desc = config_reader.Next<InterfaceDescriptor>()) {
-        Log(kDebug, *if_desc);
+        //Log(kDebug, *if_desc);
+        Log(kWarn, *if_desc);
 
         auto class_driver = NewClassDriver(this, *if_desc);
         if (class_driver == nullptr) {
           // 非対応デバイス．次の interface を調べる．
+          Log(kWarn, "class_driver is null\n");
           continue;
         }
         no_class_driver = false;
