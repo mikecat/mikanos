@@ -140,13 +140,15 @@ namespace {
         }
 
         Log(kWarn, "num_endpoints = %d\n", (int)if_desc->num_endpoints);
-        for (int i = 0; i < if_desc->num_endpoints; ++i) {
+        //for (int i = 0; i < if_desc->num_endpoints; ++i) {
+        for (int i = 0; i < if_desc->num_endpoints;) {
           auto desc = conf_reader.Next();
 	  for (int j = 0; j < 8; j++) Log(kWarn, "%02X ", (unsigned int)desc[j]);
 	  Log(kWarn, "\n");
           if (auto ep_desc = usb::DescriptorDynamicCast<usb::EndpointDescriptor>(desc)) {
             ep_configs.push_back(MakeEPConfig(*ep_desc));
             Log(kWarn, ep_configs.back());
+	    ++i; // count only endpoints (don't count Functional Descriptor)
           } else if (auto cdc = FuncDescDynamicCast<HeaderDescriptor>(desc)) {
             Log(kWarn, "kHeader: cdc=%04x\n", cdc->cdc);
           } else if (auto call = FuncDescDynamicCast<CMDescriptor>(desc)) {
