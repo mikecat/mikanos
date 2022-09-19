@@ -139,8 +139,11 @@ namespace {
           if_data = if_desc;
         }
 
+        Log(kWarn, "num_endpoints = %d\n", (int)if_desc->num_endpoints);
         for (int i = 0; i < if_desc->num_endpoints; ++i) {
           auto desc = conf_reader.Next();
+	  for (int j = 0; j < 8; j++) Log(kWarn, "%02X ", (unsigned int)desc[j]);
+	  Log(kWarn, "\n");
           if (auto ep_desc = usb::DescriptorDynamicCast<usb::EndpointDescriptor>(desc)) {
             ep_configs.push_back(MakeEPConfig(*ep_desc));
             Log(kWarn, ep_configs.back());
