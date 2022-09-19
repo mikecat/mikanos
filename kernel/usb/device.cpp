@@ -35,6 +35,7 @@ namespace {
     template <class T>
     const T* Next() {
       while (auto n = Next()) {
+        Log(kWarn, "n = %p\n", (void*)n);
         if (auto d = usb::DescriptorDynamicCast<T>(n)) {
           return d;
         }
@@ -292,8 +293,10 @@ namespace usb {
         no_class_driver = false;
         class_drivers_.push_back(class_driver);
 
+        Log(kWarn, "num_endpoints = %d\n", (int)if_desc->num_endpoints);
         for (int ep_index = 0; ep_index < if_desc->num_endpoints;) {
           auto desc = config_reader.Next();
+          if (desc) Log(kWarn, "desc = %p\n", (void*)desc);
           if (auto ep_desc = DescriptorDynamicCast<EndpointDescriptor>(desc)) {
             ep_configs_.push_back(MakeEPConfig(*ep_desc));
             Log(kDebug, ep_configs_.back());
@@ -302,6 +305,7 @@ namespace usb {
             Log(kDebug, *hid_desc);
           }
         }
+        Log(kWarn, "read endpoints done\n");
         break;
       }
 
