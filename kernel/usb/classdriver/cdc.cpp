@@ -22,10 +22,13 @@ namespace usb::cdc {
   Error CDCDriver::SetEndpoint(const std::vector<EndpointConfig>& configs) {
     for (const auto& config : configs) {
       if (config.ep_type == EndpointType::kInterrupt && config.ep_id.IsIn()) {
+        Log(kWarn, "CDC interrupt in = %d\n", (int)config.ep_id.Address());
         ep_interrupt_in_ = config.ep_id;
       } else if (config.ep_type == EndpointType::kBulk && config.ep_id.IsIn()) {
+        Log(kWarn, "CDC bulk in = %d\n", (int)config.ep_id.Address());
         ep_bulk_in_ = config.ep_id;
       } else if (config.ep_type == EndpointType::kBulk && !config.ep_id.IsIn()) {
+        Log(kWarn, "CDC bulk out = %d\n", (int)config.ep_id.Address());
         ep_bulk_out_ = config.ep_id;
       }
     }
@@ -57,6 +60,7 @@ namespace usb::cdc {
   }
 
   Error CDCDriver::SendSerial(const void* buf, int len) {
+    Log(kWarn, "SendSerial called with len = %d\n", len);
     uint8_t* buf_out = new uint8_t[len];
     memcpy(buf_out, buf, len);
     if (auto err = ParentDevice()->NormalOut(ep_bulk_out_, buf_out, len)) {
