@@ -13,6 +13,7 @@ namespace usb::cdc {
     : ClassDriver{dev},
       if_data_index_{if_data->interface_number}
   {
+    Log(kWarn, "if_data_index_ = %d\n", (int)if_data_index_);
   }
 
   Error CDCDriver::Initialize() {
@@ -95,7 +96,8 @@ namespace usb::cdc {
     setup_data.request_type.bits.recipient = request_type::kInterface;
     setup_data.request = request::kSetLineCoding;
     setup_data.value = 0;
-    setup_data.index = if_data_index_;
+    //setup_data.index = if_data_index_;
+    setup_data.index = 0;
     setup_data.length = sizeof(LineCoding);
 
     line_coding_ = value;
