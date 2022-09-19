@@ -217,7 +217,8 @@ namespace usb::xhci {
 
     if (trb.bits.completion_code != 1 /* Success */ &&
         trb.bits.completion_code != 13 /* Short Packet */) {
-      Log(kDebug, trb);
+      //Log(kDebug, trb);
+      Log(kWarn, trb);
       return MAKE_ERROR(Error::kTransferFailed);
     }
     Log(kDebug, trb);
