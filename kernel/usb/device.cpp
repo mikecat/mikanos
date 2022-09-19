@@ -25,10 +25,19 @@ namespace {
 
     const uint8_t* Next() {
       Log(kWarn, "CDR Next delta=%d\n", (int)p_[0]);
+#if 1
       p_ += p_[0];
       if (p_ < desc_buf_ + desc_buf_len_) {
         return p_;
       }
+#else
+      if (desc_buf_ + desc_buf_len_ <= p_ || p_[0] == 0) return nullptr;
+      const uint8_t* current_buf = p_;
+      p_ += p_[0];
+      if (p_ <= desc_buf_ + desc_buf_len_) {
+        return current_buf;
+      }
+#endif
       return nullptr;
     }
 
