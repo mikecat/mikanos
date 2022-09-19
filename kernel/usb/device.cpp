@@ -24,7 +24,7 @@ namespace {
     }
 
     const uint8_t* Next() {
-      Log(kWarn, "CDR Next delta=%d\n", (int)p_[0]);
+      //Log(kWarn, "CDR Next delta=%d\n", (int)p_[0]);
 #if 1
       p_ += p_[0];
       if (p_ < desc_buf_ + desc_buf_len_) {
@@ -143,8 +143,8 @@ namespace {
         //for (int i = 0; i < if_desc->num_endpoints; ++i) {
         for (int i = 0; i < if_desc->num_endpoints;) {
           auto desc = conf_reader.Next();
-          for (int j = 0; j < 8; j++) Log(kWarn, "%02X ", (unsigned int)desc[j]);
-          Log(kWarn, "\n");
+          //for (int j = 0; j < 8; j++) Log(kWarn, "%02X ", (unsigned int)desc[j]);
+          //Log(kWarn, "\n");
           if (auto ep_desc = usb::DescriptorDynamicCast<usb::EndpointDescriptor>(desc)) {
             ep_configs.push_back(MakeEPConfig(*ep_desc));
             Log(kWarn, ep_configs.back());
