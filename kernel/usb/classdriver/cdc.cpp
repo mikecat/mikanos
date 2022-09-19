@@ -49,12 +49,19 @@ namespace usb::cdc {
   }
 
   Error CDCDriver::OnNormalCompleted(EndpointID ep_id, const void* buf, int len) {
-    auto kDebug = kWarn;
-    //Log(kDebug, "CDCDriver::OnNormalCompleted: buf='%.*s'\n", len, buf);
-    Log(kDebug, "CDCDriver::OnNormalCompleted: ep=%d, buf='%.*s'\n", (int)ep_id.Address(), len, buf);
+    if (!(ep_id == ep_bulk_in_) || len > 0) {
+      auto kDebug = kWarn;
+     //Log(kDebug, "CDCDriver::OnNormalCompleted: buf='%.*s'\n", len, buf);
+      Log(kDebug, "CDCDriver::OnNormalCompleted: ep=%d, buf='%.*s'\n", (int)ep_id.Address(), len, buf);
+    }
     auto buf8 = reinterpret_cast<const uint8_t*>(buf);
     if (ep_id == ep_bulk_in_) {
       std::copy_n(buf8, len, std::back_inserter(receive_buf_));
+      if (auto err = ParentDevice()->NormalIn(ep_bulk_in_, (void*)buf, 8)) {
+        Log(kError, "%s:%d: NormalIn failed: %s\n", err.File(), err.Line(), err.Name());
+        return err;
+      }
+      return MAKE_ERROR(Error::kSuccess);
     } else if (ep_id == ep_bulk_out_) {
     } else {
       return MAKE_ERROR(Error::kEndpointNotInCharge);
