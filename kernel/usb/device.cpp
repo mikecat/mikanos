@@ -35,7 +35,7 @@ namespace {
     template <class T>
     const T* Next() {
       while (auto n = Next()) {
-        Log(kWarn, "n = %p\n", (void*)n);
+        //Log(kWarn, "n = %p\n", (void*)n);
         if (auto d = usb::DescriptorDynamicCast<T>(n)) {
           return d;
         }
@@ -305,7 +305,7 @@ namespace usb {
             Log(kDebug, *hid_desc);
           }
         }
-        Log(kWarn, "read endpoints done\n");
+        //Log(kWarn, "read endpoints done\n");
         break;
       }
 
