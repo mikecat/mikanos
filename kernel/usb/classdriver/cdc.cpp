@@ -41,12 +41,14 @@ namespace usb::cdc {
 
   Error CDCDriver::OnControlCompleted(EndpointID ep_id, SetupData setup_data,
                                       const void* buf, int len) {
+    auto kDebug = kWarn;
     Log(kDebug, "CDCDriver::OnControlCompleted: req_type=0x%02x req=0x%02x len=%u\n",
         setup_data.request_type.data, setup_data.request, len);
     return MAKE_ERROR(Error::kSuccess);
   }
 
   Error CDCDriver::OnNormalCompleted(EndpointID ep_id, const void* buf, int len) {
+    auto kDebug = kWarn;
     Log(kDebug, "CDCDriver::OnNormalCompleted: buf='%.*s'\n", len, buf);
     auto buf8 = reinterpret_cast<const uint8_t*>(buf);
     if (ep_id == ep_bulk_in_) {
