@@ -113,7 +113,7 @@ namespace {
 
   Error ResetPort(Controller& xhc, Port& port) {
     const bool is_connected = port.IsConnected();
-    Log(kDebug, "ResetPort: port.IsConnected() = %s\n",
+    Log(kWarn, "ResetPort: port.IsConnected() = %s\n",
         is_connected ? "true" : "false");
 
     if (!is_connected) {
@@ -138,7 +138,7 @@ namespace {
   Error EnableSlot(Controller& xhc, Port& port) {
     const bool is_enabled = port.IsEnabled();
     const bool reset_completed = port.IsPortResetChanged();
-    Log(kDebug, "EnableSlot: port.IsEnabled() = %s, port.IsPortResetChanged() = %s\n",
+    Log(kWarn, "EnableSlot: port.IsEnabled() = %s, port.IsPortResetChanged() = %s\n",
         is_enabled ? "true" : "false",
         reset_completed ? "true" : "false");
 
@@ -155,7 +155,7 @@ namespace {
   }
 
   Error AddressDevice(Controller& xhc, uint8_t port_id, uint8_t slot_id) {
-    Log(kDebug, "AddressDevice: port_id = %d, slot_id = %d\n", port_id, slot_id);
+    Log(kWarn, "AddressDevice: port_id = %d, slot_id = %d\n", port_id, slot_id);
 
     xhc.DeviceManager()->AllocDevice(slot_id, xhc.DoorbellRegisterAt(slot_id));
 
@@ -190,7 +190,7 @@ namespace {
   }
 
   Error InitializeDevice(Controller& xhc, uint8_t port_id, uint8_t slot_id) {
-    Log(kDebug, "InitializeDevice: port_id = %d, slot_id = %d\n", port_id, slot_id);
+    Log(kWarn, "InitializeDevice: port_id = %d, slot_id = %d\n", port_id, slot_id);
 
     auto dev = xhc.DeviceManager()->FindBySlot(slot_id);
     if (dev == nullptr) {
@@ -204,7 +204,7 @@ namespace {
   }
 
   Error CompleteConfiguration(Controller& xhc, uint8_t port_id, uint8_t slot_id) {
-    Log(kDebug, "CompleteConfiguration: port_id = %d, slot_id = %d\n", port_id, slot_id);
+    Log(kWarn, "CompleteConfiguration: port_id = %d, slot_id = %d\n", port_id, slot_id);
 
     auto dev = xhc.DeviceManager()->FindBySlot(slot_id);
     if (dev == nullptr) {
@@ -218,7 +218,7 @@ namespace {
   }
 
   Error OnEvent(Controller& xhc, PortStatusChangeEventTRB& trb) {
-    Log(kDebug, "PortStatusChangeEvent: port_id = %d\n", trb.bits.port_id);
+    Log(kWarn, "PortStatusChangeEvent: port_id = %d\n", trb.bits.port_id);
     auto port_id = trb.bits.port_id;
     auto port = xhc.PortAt(port_id);
 
@@ -256,8 +256,8 @@ namespace {
   Error OnEvent(Controller& xhc, CommandCompletionEventTRB& trb) {
     const auto issuer_type = trb.Pointer()->bits.trb_type;
     const auto slot_id = trb.bits.slot_id;
-    Log(kDebug, "CommandCompletionEvent: slot_id = %d, issuer = %s\n",
-        trb.bits.slot_id, kTRBTypeToName[issuer_type]);
+    Log(kWarn, "CommandCompletionEvent: slot_id = %d, cc = %d, issuer = %s\n",
+        trb.bits.slot_id, (int)trb.bits.completion_code, kTRBTypeToName[issuer_type]);
 
     if (issuer_type == EnableSlotCommandTRB::Type) {
       if (port_config_phase[addressing_port] != ConfigPhase::kEnablingSlot) {
@@ -274,6 +274,7 @@ namespace {
       auto port_id = dev->DeviceContext()->slot_context.bits.root_hub_port_num;
 
       if (port_id != addressing_port) {
+        Log(kWarn, "port_id = %d, addressing_port = %d\n", (int)port_id, (int)addressing_port);
         return MAKE_ERROR(Error::kInvalidPhase);
       }
       if (port_config_phase[port_id] != ConfigPhase::kAddressingDevice) {
@@ -284,9 +285,9 @@ namespace {
       for (int i = 0; i < port_config_phase.size(); ++i) {
         if (port_config_phase[i] == ConfigPhase::kWaitingAddressed) {
           auto port = xhc.PortAt(i);
-          if (auto err = ResetPort(xhc, port); err) {
-            return err;
-          }
+          //if (auto err = ResetPort(xhc, port); err) {
+          //  return err;
+          //}
           break;
         }
       }
@@ -402,7 +403,7 @@ namespace usb::xhci {
     while (op_->USBCMD.Read().bits.host_controller_reset);
     while (op_->USBSTS.Read().bits.controller_not_ready);
 
-    Log(kDebug, "MaxSlots: %u\n", cap_->HCSPARAMS1.Read().bits.max_device_slots);
+    Log(kWarn, "MaxSlots: %u\n", cap_->HCSPARAMS1.Read().bits.max_device_slots);
     // Set "Max Slots Enabled" field in CONFIG.
     auto config = op_->CONFIG.Read();
     config.bits.max_device_slots_enabled = kDeviceSize;
@@ -609,7 +610,7 @@ namespace usb::xhci {
 
     for (int i = 1; i <= xhc.MaxPorts(); ++i) {
       auto port = xhc.PortAt(i);
-      Log(kDebug, "Port %d: IsConnected=%d\n", i, port.IsConnected());
+      Log(kWarn, "Port %d: IsConnected=%d\n", i, port.IsConnected());
 
       if (port.IsConnected()) {
         if (auto err = ConfigurePort(xhc, port)) {
