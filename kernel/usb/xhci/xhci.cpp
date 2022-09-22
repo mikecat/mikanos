@@ -234,6 +234,7 @@ namespace {
     if (!port.IsConnected()) {
       Log(kWarn, "not connected, resetting phase to kNotConnected\n");
       port_config_phase[port_id] = ConfigPhase::kNotConnected;
+      port.ClearConnectStatusChanged();
       return MAKE_ERROR(Error::kSuccess);
     }
     switch (port_config_phase[port_id]) {
