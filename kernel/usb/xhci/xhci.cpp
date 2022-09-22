@@ -231,6 +231,11 @@ namespace {
         static_cast<int>(port_config_phase[port_id]),
         port.IsConnected() ? "true" : "false",
         port.IsEnabled() ? "true" : "false");
+    if (!port.IsConnected()) {
+      Log(kWarn, "not connected, resetting phase to kNotConnected\n");
+      port_config_phase[port_id] = ConfigPhase::kNotConnected;
+      return MAKE_ERROR(Error::kSuccess);
+    }
     switch (port_config_phase[port_id]) {
     case ConfigPhase::kNotConnected:
       return ResetPort(xhc, port);
