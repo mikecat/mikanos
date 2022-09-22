@@ -125,7 +125,7 @@ namespace {
       return MAKE_ERROR(Error::kSuccess);
     }
 
-    if (addressing_port != 0) {
+    if (addressing_port != 0 && addressing_port != port.Number()) {
       port_config_phase[port.Number()] = ConfigPhase::kWaitingAddressed;
     } else {
       const auto port_phase = port_config_phase[port.Number()];
@@ -155,6 +155,10 @@ namespace {
       EnableSlotCommandTRB cmd{};
       xhc.CommandRing()->Push(cmd);
       xhc.DoorbellRegisterAt(0)->Ring(0);
+    } else if (!is_enabled) {
+      Log(kWarn, "resetting again\n");
+      port_config_phase[port.Number()] = ConfigPhase::kNotConnected;
+      return ResetPort(xhc, port);
     }
     return MAKE_ERROR(Error::kSuccess);
   }
@@ -232,12 +236,6 @@ namespace {
         static_cast<int>(port_config_phase[port_id]),
         is_connected ? "true" : "false",
         port.IsEnabled() ? "true" : "false");
-    if (!is_connected) {
-      Log(kWarn, "not connected, resetting phase to kNotConnected\n");
-      port_config_phase[port_id] = ConfigPhase::kNotConnected;
-      port.ClearConnectStatusChanged();
-      return MAKE_ERROR(Error::kSuccess);
-    }
     switch (port_config_phase[port_id]) {
     case ConfigPhase::kNotConnected:
       return ResetPort(xhc, port);
