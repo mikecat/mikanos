@@ -222,6 +222,10 @@ namespace {
     auto port_id = trb.bits.port_id;
     auto port = xhc.PortAt(port_id);
 
+    Log(kWarn, "phase = %d, connected = %s, enabled = %s\n",
+        static_cast<int>(port_config_phase[port_id]),
+        port.IsConnected() ? "true" : "false",
+        port.IsEnabled() ? "true" : "false");
     switch (port_config_phase[port_id]) {
     case ConfigPhase::kNotConnected:
       return ResetPort(xhc, port);
