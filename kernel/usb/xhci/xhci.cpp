@@ -115,7 +115,11 @@ namespace {
     const bool is_connected = port.IsConnected();
     Log(kWarn, "ResetPort: port.IsConnected() = %s\n",
         is_connected ? "true" : "false");
-    Log(kWarn, "port number = %d\n", (int)port.Number());
+    Log(kWarn, "port number = %d, enabled = %s, CSC = %s, PRC = %s\n",
+        (int)port.Number(),
+        port.IsEnabled() ? "true" : "false",
+        port.IsConnectStatusChanged() ? "true" : "false",
+        port.IsPortResetChanged() ? "true" : "false");
 
     if (!is_connected) {
       return MAKE_ERROR(Error::kSuccess);
