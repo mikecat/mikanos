@@ -277,6 +277,19 @@ namespace {
 
       auto port_id = dev->DeviceContext()->slot_context.bits.root_hub_port_num;
 
+      if (trb.bits.completion_code != 1) {
+        static int retry_count = 0;
+        if (++retry_count > 10) {
+          Log(kDebug, "too many resend\n");
+          return MAKE_ERROR(Error::kInvalidPhase);
+        }
+        Log(kWarn, "resending AddressDeviceCommandTRB\n");
+        AddressDeviceCommandTRB addr_dev_cmd{dev->InputContext(), static_cast<uint8_t>(slot_id)};
+        xhc.CommandRing()->Push(addr_dev_cmd);
+        xhc.DoorbellRegisterAt(0)->Ring(0);
+        return MAKE_ERROR(Error::kSuccess);
+      }
+
       if (port_id != addressing_port) {
         Log(kWarn, "port_id = %d, addressing_port = %d\n", (int)port_id, (int)addressing_port);
         return MAKE_ERROR(Error::kInvalidPhase);
