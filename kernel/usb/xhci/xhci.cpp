@@ -289,9 +289,9 @@ namespace {
       for (int i = 0; i < port_config_phase.size(); ++i) {
         if (port_config_phase[i] == ConfigPhase::kWaitingAddressed) {
           auto port = xhc.PortAt(i);
-          //if (auto err = ResetPort(xhc, port); err) {
-          //  return err;
-          //}
+          if (auto err = ResetPort(xhc, port); err) {
+            return err;
+          }
           break;
         }
       }
