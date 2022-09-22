@@ -226,12 +226,13 @@ namespace {
     Log(kWarn, "PortStatusChangeEvent: port_id = %d\n", trb.bits.port_id);
     auto port_id = trb.bits.port_id;
     auto port = xhc.PortAt(port_id);
+    auto is_connected = port.IsConnected();
 
     Log(kWarn, "phase = %d, connected = %s, enabled = %s\n",
         static_cast<int>(port_config_phase[port_id]),
-        port.IsConnected() ? "true" : "false",
+        is_connected ? "true" : "false",
         port.IsEnabled() ? "true" : "false");
-    if (!port.IsConnected()) {
+    if (!is_connected) {
       Log(kWarn, "not connected, resetting phase to kNotConnected\n");
       port_config_phase[port_id] = ConfigPhase::kNotConnected;
       port.ClearConnectStatusChanged();
